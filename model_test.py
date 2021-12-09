@@ -1,3 +1,4 @@
+#imports
 import torch
 from PIL import Image
 import torchvision.models as models
@@ -5,7 +6,7 @@ import torchvision.transforms as transforms
 from torch.autograd import Variable
 import cv2
 
-
+#disctionary mapping for the classes
 import re
 a_dictionary = {}
 a_file = open("mapping.txt")
@@ -13,14 +14,10 @@ for line in a_file:
     key, value = line.split(":")
     key=re.findall(r'\d+',key)[0]
     key=int(key)
-
     a_dictionary[key] = value
 
 
-print(a_dictionary[1])
-
-
-
+#opencv videocapture
 vc=cv2.VideoCapture(0)
 img=Image.open("elephant.png")
 
@@ -28,7 +25,7 @@ test_transforms = transforms.Compose([transforms.Resize(224),
                                       transforms.ToTensor(),
                                      ])
 
-
+#image prediction function
 def predict_image(image):
     image_tensor = test_transforms(image).float()
     image_tensor = image_tensor.unsqueeze_(0)
@@ -38,10 +35,7 @@ def predict_image(image):
     index = output.data.cpu().numpy().argmax()
     return index
 
-#i=cv2.imread('elephant.png')
-#cv2.imshow("t",i)
-#cv2.waitKey()
-
+#pytorch prediction
 model = models.googlenet(pretrained=True)
 model.eval()
 while(1):
