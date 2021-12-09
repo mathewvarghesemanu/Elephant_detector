@@ -6,6 +6,7 @@ import torchvision.transforms as transforms
 from torch.autograd import Variable
 import cv2
 import time
+import pygame
 
 #variables
 is_elephant_bool=False
@@ -57,8 +58,12 @@ def predict_image(image):
     index = output.data.cpu().numpy().argmax()
     return index
 
-def play_sound():
-    pass
+def play_sound(sound_file):
+    pygame.mixer.init()
+    pygame.mixer.music.load(sound_file)
+    pygame.mixer.music.play()
+    while(pygame.mixer.music.get_busy()==True):
+          continue
 
 def is_play_sound(is_elephant_bool,is_bird_bool):
     if is_elephant_bool==True:
