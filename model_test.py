@@ -40,10 +40,12 @@ model = models.googlenet(pretrained=True)
 model.eval()
 while(1):
 	ret,frame=vc.read()
-	frame = cv2.resize(frame, (225,225), interpolation = cv2.INTER_AREA)
+	frame = cv2.resize(frame, (800,800), interpolation = cv2.INTER_AREA)
 	cv2.imshow("im",frame)
 	if cv2.waitKey(1)==ord('q'):
 		break
+	frame = cv2.resize(frame, (225,225), interpolation = cv2.INTER_AREA)
+	
 	
 	color_coverted = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 	pil_image=Image.fromarray(color_coverted)
