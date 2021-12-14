@@ -8,7 +8,8 @@ import cv2
 import time
 import pygame
 import threading
-
+import telegram_send
+from datetime import datetime
 #variables
 is_elephant_bool=False
 is_bird_bool=False
@@ -66,20 +67,36 @@ def play_sound(sound_file):
     while(pygame.mixer.music.get_busy()==True):
           continue
 
-def is_play_sound(is_elephant_bool,is_bird_bool):
+def is_play_sound(is_elephant_bool,is_bird_bool,frame):
     
     if is_elephant_bool==True:
         print('playng elephant sound')
         sound_file="bee.mp3"
         play_sound(sound_file)
+        cv2.imwrite("captured_images/image.jpg",frame)
+        send_telegram_message('Elephant')
     elif is_bird_bool==True:
         print('playng hawk sound...')
         sound_file="hawk.mp3"
         play_sound(sound_file)
+        cv2.imwrite("captured_images/image.jpg",frame)
+        send_telegram_message('Bird')
     else:
         pass
 
 
+def get_date_time():
+    now=datetime.now()
+    dt_string=now.strftime("%d/%m/%Y %H:%M:%S")
+    return dt_string
+
+def send_telegram_message(animal_type):
+    telegram_send.send(messages=[animal_type+" Found!!"])
+    with open ("captured_images/image.jpg","rb") as f:
+        telegram_send.send(images=[f])
+    telegram_send.send(messages=[get_date_time()])
+    
+    
 #pytorch prediction
 model = models.googlenet(pretrained=True)
 model.eval()
@@ -106,10 +123,11 @@ while(1):
         is_elephant_bool=is_elephant_fn(result)
         is_bird_bool=is_bird_fn(result)
         #is_play_sound(is_elephant_bool,is_bird_bool)
-        x0=threading.Thread(target=is_play_sound,args=(is_elephant_bool,is_bird_bool))
+        x0=threading.Thread(target=is_play_sound,args=(is_elephant_bool,is_bird_bool,frame))
         x0.start()
         prediction_time=time.time()
         time_difference=prediction_time-frame_time
         print("Prediction time", time_difference)
+        
 
 vc.release()
