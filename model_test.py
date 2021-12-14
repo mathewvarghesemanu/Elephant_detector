@@ -7,6 +7,7 @@ from torch.autograd import Variable
 import cv2
 import time
 import pygame
+import threading
 
 #variables
 is_elephant_bool=False
@@ -66,10 +67,13 @@ def play_sound(sound_file):
           continue
 
 def is_play_sound(is_elephant_bool,is_bird_bool):
+    
     if is_elephant_bool==True:
+        print('playng elephant sound')
         sound_file="bee.mp3"
         play_sound(sound_file)
     elif is_bird_bool==True:
+        print('playng hawk sound...')
         sound_file="hawk.mp3"
         play_sound(sound_file)
     else:
@@ -79,25 +83,33 @@ def is_play_sound(is_elephant_bool,is_bird_bool):
 #pytorch prediction
 model = models.googlenet(pretrained=True)
 model.eval()
+flag_time=time.time()
 while(1):
+
     ret,frame=vc.read()
+    frame=cv2.rotate(frame,cv2.ROTATE_180)
     frame = cv2.resize(frame, (800,800), interpolation = cv2.INTER_AREA)
     cv2.imshow("im",frame)
     if cv2.waitKey(1)==ord('q'):
         break
     frame = cv2.resize(frame, (225,225), interpolation = cv2.INTER_AREA)
-    frame_time=time.time()
+
     
-    color_coverted = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    pil_image=Image.fromarray(color_coverted)
-    result=predict_image(pil_image)
-    print(a_dictionary[result])
-    
-    is_elephant_bool=is_elephant_fn(result)
-    is_bird_bool=is_bird_fn(result)
-    is_play_sound(is_elephant_bool,is_bird_bool)
-    prediction_time=time.time()
-    time_difference=prediction_time-frame_time
-    print("Prediction time", time_difference)
-    
+    if time.time()-flag_time>3:
+        flag_time=time.time()
+        frame_time=time.time()
+        color_coverted = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        pil_image=Image.fromarray(color_coverted)
+        result=predict_image(pil_image)
+        print(a_dictionary[result])
+        
+        is_elephant_bool=is_elephant_fn(result)
+        is_bird_bool=is_bird_fn(result)
+        #is_play_sound(is_elephant_bool,is_bird_bool)
+        x0=threading.Thread(target=is_play_sound,args=(is_elephant_bool,is_bird_bool))
+        x0.start()
+        prediction_time=time.time()
+        time_difference=prediction_time-frame_time
+        print("Prediction time", time_difference)
+
 vc.release()
