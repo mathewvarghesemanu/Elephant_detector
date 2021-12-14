@@ -27,7 +27,7 @@ def dict_mapping(mapping_file_path):
         a_dictionary[key] = value
     return a_dictionary
 
-a_dictionary=dict_mapping("mapping.txt")
+a_dictionary=dict_mapping("assets/mapping.txt")
 
 
 #opencv videocapture
@@ -70,14 +70,14 @@ def play_sound(sound_file):
 def is_play_sound(is_elephant_bool,is_bird_bool,frame):
     
     if is_elephant_bool==True:
-        print('playng elephant sound')
-        sound_file="bee.mp3"
+        print('playing elephant sound')
+        sound_file="assets/bee.mp3"
         play_sound(sound_file)
         cv2.imwrite("captured_images/image.jpg",frame)
         send_telegram_message('Elephant')
     elif is_bird_bool==True:
-        print('playng hawk sound...')
-        sound_file="hawk.mp3"
+        print('playing hawk sound...')
+        sound_file="assets/hawk.mp3"
         play_sound(sound_file)
         cv2.imwrite("captured_images/image.jpg",frame)
         send_telegram_message('Bird')
@@ -99,6 +99,9 @@ def send_telegram_message(animal_type):
     
 #pytorch prediction
 model = models.googlenet(pretrained=True)
+#model = models.resnet18(pretrained=True)
+#model = torch.hub.load('pytorch/vision:v0.10.0', 'mobilenet_v2', pretrained=True)
+
 model.eval()
 flag_time=time.time()
 while(1):
@@ -122,6 +125,11 @@ while(1):
         
         is_elephant_bool=is_elephant_fn(result)
         is_bird_bool=is_bird_fn(result)
+        if (is_elephant_bool or is_bird_bool):
+            print(a_dictionary[result])
+        else:
+            print( " Others")
+
         #is_play_sound(is_elephant_bool,is_bird_bool)
         x0=threading.Thread(target=is_play_sound,args=(is_elephant_bool,is_bird_bool,frame))
         x0.start()
